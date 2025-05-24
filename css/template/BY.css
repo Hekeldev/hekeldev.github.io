@@ -1,0 +1,22 @@
+:root {
+    --text-color: #333;
+    --primary-text-color: #000000;
+    --reverse-text-color: #ffffff;
+    --primary-color: #fad82e;
+    --primary-background: #f2f2f2;
+    --line-color: #0e3bb8;
+    --marquee-color: #000000;
+    --marquee-background: #fad82e;
+    
+    --result-background: #ffd400;
+    --result-keluaran-color: #000000;
+    --result-pasaran-color: #000000;
+    --result-tanggal-color: #FFFFFF;
+    --result-tanggal-background: #0b54a1;
+    --result-border: 3px solid #0b54a1;
+    
+    --secondary-background: #DDDDDD;
+    --hover-background: rgba(153, 132, 26, 0.9);
+    --content-box-background: rgba(221, 221, 221, .5);
+    --menu-item-color: var(--text-color);
+}
