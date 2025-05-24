@@ -1,0 +1,19 @@
+:root {
+    --secondary-background: #DDDDDD;
+    --primary-theme-color: white;
+    --reverse-theme-color: black;
+    --highlight-text-color: #996515;
+    --page-link-background: #FFFFFF;
+    --page-link-color: var(--primary-text-color);
+    --page-link-border: 1px solid #bdbdbd;
+    --page-item-active-color: var(--reverse-text-color);
+    --page-item-active-background: var(--primary-color);
+    --page-item-active-border: 1px solid var(--primary-color);
+    --devider-color: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 25%, rgba(136,136,136,1) 25%, rgba(136,136,136,1) 100%);
+    --prepend-background: #eeeeee;
+    --prepend-color: #333;
+    --prepend-border: 1px;
+    --content-box-background: #eaebef;
+    --informasi-menu-background: #eee;
+    --informasi-content-background: #fff;
+}
