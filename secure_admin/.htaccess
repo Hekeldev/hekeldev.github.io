@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /pay4d/secure_admin/
+
+# Cek apakah status website adalah "tidak aktif" (Anda harus menyesuaikan variabel dan nilainya)
+RewriteCond %{ENV:MAINTENANCE_MODE} ^1$
+# Redirect ke halaman maintenance.php jika status "tidak aktif"
+RewriteRule ^(.*)$ /maintenance.php [L]

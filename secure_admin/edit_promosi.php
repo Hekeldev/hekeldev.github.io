@@ -1,0 +1,351 @@
+<?php
+
+
+if (isset($_GET['id'])) {
+    $accordionId = $_GET['id'];
+
+    // Ambil data accordion yang akan di-edit
+    $query = "SELECT * FROM accordions WHERE id='$accordionId'";
+    $result = mysqli_query($conn, $query);
+    $accordion = mysqli_fetch_assoc($result);
+} else {
+    echo "Akses tidak valid.";
+    exit;
+}
+?>
+
+<form method="post" action="edit_accordion.php" class="form-horizontal">
+    <input type="hidden" name="accordionId" value="<?php echo $accordionId; ?>">
+    <div class="form-group">
+        <label for="title">Judul</label>
+        <input type="text" class="form-control" id="title" name="title" value="<?php echo $accordion['title']; ?>">
+    </div>
+    <div class="form-group">
+        <label for="alt_text">ALT TEXT</label>
+        <input type="text" class="form-control" id="alt_text" name="alt_text" value="<?php echo $accordion['alt_text']; ?>">
+    </div>
+    <div class="form-group">
+        <label for="description">Deskripsi</label>
+        <textarea class="form-control" id="description" name="description"><?php echo $accordion['description']; ?></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary" name="updateAccordion">Update</button>
+</form>
+
+<div class="content-page">
+    <div class="content">
+
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box">
+
+                    <h4 class="page-title">Pengguna</h4>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+
+
+
+                        <button type="button" id="createNewPengguna" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#success-header-modal"><i class="mdi mdi-plus-circle me-2"></i> Tambah</button>
+                        <div class="tab-content">
+                            <div class="tab-pane show active" id="state-saving-preview">
+                                <div id="datatable_wrapper" class="dataTables_wrapper dt-bootstrap5 no-footer">
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6">
+                                            <div class="dataTables_length" id="datatable_length"><label class="form-label">Show <select name="datatable_length" aria-controls="datatable" class="form-select form-select-sm">
+                                                        <option value="10">10</option>
+                                                        <option value="25">25</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                    </select> entries</label></div>
+                                        </div>
+                                        <div class="col-sm-12 col-md-6">
+                                            <div id="datatable_filter" class="dataTables_filter"><label>Search:<input type="search" class="form-control form-control-sm" placeholder="" aria-controls="datatable"></label></div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table id="datatable" class="table table-centered table-bordered table-hover w-100 dt-responsive nowrap dataTable no-footer dtr-inline" role="grid" aria-describedby="datatable_info" style="width: 905px;">
+                                                <thead class="table-light">
+                                                    <tr role="row">
+                                                        <th width="20px" class="sorting_disabled sorting_asc" rowspan="1" colspan="1" style="width: 19px;" aria-label="No">No</th>
+                                                        <th class="sorting" tabindex="0" aria-controls="datatable" rowspan="1" colspan="1" style="width: 107.8px;" aria-label="Judul: activate to sort column ascending">Judul</th>
+                                                        <th class="sorting" tabindex="0" aria-controls="datatable" rowspan="1" colspan="1" style="width: 157.8px;" aria-label="Gambar: activate to sort column ascending">Gambar</th>
+                                                        <th class="sorting" tabindex="0" aria-controls="datatable" rowspan="1" colspan="1" style="width: 91.8px;" aria-label="ALT TEXT: activate to sort column ascending">ALT TEXT</th>
+                                                        <th class="sorting" tabindex="0" aria-controls="datatable" rowspan="1" colspan="1" style="width: 69.8px;" aria-label="Deskripsi Promo: activate to sort column ascending">Deskripsi Promo</th>
+                                                        <th class="sorting_disabled" rowspan="1" colspan="1" style="width: 110px;" aria-label="Aksi">Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php
+                                                    // Mengambil data accordions
+                                                    $queryAccordions = "SELECT * FROM accordions";
+                                                    $resultAccordions = mysqli_query($conn, $queryAccordions);
+                                                    $no = 1;
+                                                    while ($accordion = mysqli_fetch_assoc($resultAccordions)) :
+                                                    ?>
+                                                        <tr>
+                                                            <td><?php echo $no++; ?></td>
+                                                            <td><?php echo $accordion['title']; ?></td>
+                                                            <td><img src="../<?php echo $accordion['image_path']; ?>" alt="<?php echo $accordion['alt_text']; ?>" width="100"></td>
+                                                            <td><?php echo $accordion['alt_text']; ?></td>
+                                                            <td>
+                                                                <form action="admin.php" method="post">
+                                                                    <textarea name="description"><?php echo $accordion['description']; ?></textarea>
+                                                                    <input type="hidden" name="accordionId" value="<?php echo $accordion['id']; ?>">
+                                                                    
+                                                                    
+                                                                </form>
+                                                            </td>
+                                                            
+                                                            <td>
+                                                            <a href="?PAY4D=edit_promosi" class="edit btn btn-outline-primary btn-sm editPengguna"> <i class="mdi mdi-square-edit-outline"></i></a>
+                                                                <a href="index.php?deleteAccordion=<?php echo $accordion['id']; ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus promosi ini?')" class="btn btn-outline-danger btn-sm deletePengguna"><i class="mdi mdi-delete"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endwhile; ?>
+                                                </tbody>
+                                            </table>
+                                            <div id="datatable_processing" class="dataTables_processing card" style="display: none;">Processing...</div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-5">
+                                            <div class="dataTables_info" id="datatable_info" role="status" aria-live="polite">Showing 1 to <?php echo $no - 1; ?> of <?php echo $no - 1; ?> entries</div>
+                                        </div>
+                                        <div class="col-sm-12 col-md-7">
+                                            <div class="dataTables_paginate paging_simple_numbers" id="datatable_paginate">
+                                                <ul class="pagination">
+                                                    <li class="paginate_button page-item previous disabled" id="datatable_previous"><a href="#" aria-controls="datatable" data-dt-idx="0" tabindex="0" class="page-link">Previous</a></li>
+                                                    <li class="paginate_button page-item active"><a href="#" aria-controls="datatable" data-dt-idx="1" tabindex="0" class="page-link">1</a></li>
+                                                    <li class="paginate_button page-item next disabled" id="datatable_next"><a href="#" aria-controls="datatable" data-dt-idx="2" tabindex="0" class="page-link">Next</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+
+
+                                </div>
+                            </div> <!-- end card body-->
+                        </div> <!-- end card -->
+                    </div><!-- end col-->
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+            <script type="text/javascript">
+                $(document).ready(function(e) {
+
+
+                    $('#file').change(function() {
+
+                        let reader = new FileReader();
+
+                        reader.onload = (e) => {
+
+                            $('#preview-image-before-upload').attr('src', e.target.result);
+                        }
+
+                        reader.readAsDataURL(this.files[0]);
+
+                    });
+
+                });
+
+                $(document).ready(function() {
+                    //ajax setup
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
+
+                    // datatable
+                    var table = $('#datatable').DataTable({
+                        processing: true,
+                        serverSide: true,
+                        responsive: true,
+                        retrieve: true,
+                        paging: true,
+                        destroy: true,
+                        "scrollX": false,
+                        ajax: {
+                            url: "Table",
+                            type: "POST",
+
+                        },
+                        columns: [{
+                                data: 'DT_RowIndex',
+                                name: 'DT_RowIndex',
+                                orderable: false,
+                                searchable: false
+                            },
+                            {
+                                data: 'name',
+                                name: 'name'
+                            },
+                            {
+                                data: 'email',
+                                name: 'email'
+                            },
+                            {
+                                data: 'username',
+                                name: 'username'
+                            },
+                            {
+                                data: 'level',
+                                name: 'level'
+                            },
+                            {
+                                data: 'foto',
+                                name: 'foto',
+                                orderable: false,
+                                searchable: false
+                            },
+                            {
+                                data: 'website_id',
+                                name: 'website_id'
+                            },
+                            {
+                                data: 'action',
+                                name: 'action',
+                                orderable: false,
+                                searchable: false
+                            },
+                        ]
+                    });
+
+                    $('#createNewPengguna').click(function() {
+                        $('#saveBtn').html("Simpan");
+                        $('#id_pengguna').val('');
+                        $('#penggunaForm').trigger("reset");
+                        $('#modelHeading').html("Tambah Pengguna ");
+                        $('#ajaxModel').modal('show');
+                    });
+
+                    $('#saveBtn').click(function(e) {
+                        e.preventDefault();
+                        $(this).html('Menyimpan..');
+
+                        var form = $('#penggunaForm')[0];
+                        var formData = new FormData(form);
+                        $.ajax({
+                            data: formData,
+                            url: "/simpan",
+                            type: "POST",
+                            dataType: 'json',
+                            contentType: false,
+                            cache: false,
+                            processData: false,
+                            success: function(data) {
+                                if (data.success == true) {
+                                    $('#penggunaForm').trigger("reset");
+                                    $('#ajaxModel').modal('hide');
+                                    table.draw();
+                                    $('#saveBtn').html('Simpan');
+                                    $.NotificationApp.send("Berhasil", data.message, "top-right", "",
+                                        "success")
+                                } else {
+                                    $('#saveBtn').html('Simpan');
+                                    swal("Pesan", data.message, "error");
+                                }
+                            },
+                            error: function(xhr) {
+                                var res = xhr.responseJSON;
+                                if ($.isEmptyObject(res) == false) {
+                                    err = '';
+                                    $.each(res.errors, function(key, value) {
+                                        // err += value + ', ';
+                                        err = value;
+                                    });
+                                    $('#saveBtn').html('Simpan');
+                                    $("#canvasloading").hide();
+                                    $("#loading").hide();
+                                    swal("Pesan", err, "error");
+                                }
+                            }
+                        });
+                    });
+
+                    $('body').on('click', '.editPengguna', function() {
+
+                        var id_pengguna = $(this).data('id_pengguna');
+                        $.get("" + '/' + id_pengguna + '/edit', function(data) {
+                            $('#modelHeading').html("Ubah Pengguna ");
+                            $('#saveBtn').html('Perbaharui');
+                            $('#ajaxModel').modal('show');
+                            $('#id_pengguna').val(data.data.id);
+                            $('#nama_lengkap').val(data.data.name);
+                            $('#email').val(data.data.email);
+                            $('#username').val(data.data.username);
+                            $('#level').val(data.data.level);
+                            $('select[name="website"]').val(data.data.website_id);
+                            $("#roles").val(data.userRole);
+
+                        })
+
+                    });
+
+                    $('body').on('click', '.deletePengguna', function() {
+
+                        var id_pengguna = $(this).data("id_pengguna");
+                        swal({
+                                title: "Yakin hapus data ini?",
+                                text: "Data yang sudah dihapus tidak dapat dikembalikan!",
+                                type: "warning",
+                                showCancelButton: true,
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "Ya, Hapus Data!",
+                                cancelButtonText: "Batal!",
+                                closeOnConfirm: true,
+                                closeOnCancel: true
+                            },
+                            function(isConfirm) {
+                                if (isConfirm) {
+                                    $.ajax({
+                                        type: "DELETE",
+                                        url: "" + '/' + id_pengguna,
+                                        success: function(data) {
+                                            if (data.success == true) {
+                                                table.draw();
+                                                $.NotificationApp.send("Berhasil", data.message, "top-right", "",
+                                                    "success")
+                                            } else {
+                                                swal("Gagal!", data.message, "error");
+                                            }
+                                        },
+                                        error: function(data) {
+                                            console.log('Error:', data);
+                                            swal("Pesan", data.message, "error");
+                                        }
+                                    });
+
+                                } else {
+                                    swal("Pesan", "Hapus data dibatalkan...! :)", "error");
+                                }
+                            });
+                    });
+
+                });
+            </script>
+
+        </div> <!-- End Content -->
+
+
+
+    </div>
+
