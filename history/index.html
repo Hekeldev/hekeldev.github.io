@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Riwayat Lagu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-4">  <h1 class="text-2xl font-bold mb-4">🎧 Riwayat Lagu</h1>  <div class="w-full max-w-md bg-gray-800 p-4 rounded-xl shadow">
+    <div class="flex gap-2 mb-3">
+      <button onclick="sortByTime()" class="flex-1 bg-blue-600 p-2 rounded">Urutan Riwayat</button>
+      <button onclick="sortByName()" class="flex-1 bg-green-600 p-2 rounded">A - Z</button>
+    </div><ul id="historyList" class="space-y-2"></ul>
+
+<audio id="player" controls class="w-full mt-4"></audio>
+
+  </div>  <script>
+    let history = JSON.parse(localStorage.getItem("musicHistory") || "[]");
+
+    function render(list) {
+      const ul = document.getElementById("historyList");
+      ul.innerHTML = "";
+
+      list.forEach((song, i) => {
+        const li = document.createElement("li");
+        li.className = "bg-gray-700 p-2 rounded cursor-pointer hover:bg-gray-600";
+        li.innerText = `${i + 1}. ${song.name}`;
+        li.onclick = () => playSong(song.url);
+        ul.appendChild(li);
+      });
+    }
+
+    function playSong(url) {
+      const player = document.getElementById("player");
+      player.src = url;
+      player.play();
+    }
+
+    function sortByTime() {
+      render(history);
+    }
+
+    function sortByName() {
+      const sorted = [...history].sort((a, b) => a.name.localeCompare(b.name));
+      render(sorted);
+    }
+
+    render(history);
+  </script></body>
+  </html>
