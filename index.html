@@ -1,37 +1,61 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Simple Music Player</title>
+  <title>Mp3Player</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">  <div class="bg-gray-800 p-6 rounded-2xl w-full max-w-md shadow-lg">
-    <h1 class="text-xl font-bold mb-4 text-center">🎵 Music Player</h1><!-- Audio Player -->
-<audio id="audio" controls class="w-full mb-4"></audio>
 
-<!-- Local File Upload -->
-<label class="block mb-2 font-semibold">Import dari Local Storage:</label>
-<input type="file" id="fileInput" accept="audio/*" class="w-full mb-4" />
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
 
-<!-- YouTube URL -->
-<label class="block mb-2 font-semibold">Putar dari YouTube (Embed):</label>
-<input type="text" id="ytUrl" placeholder="https://youtube.com/watch?v=..." class="w-full p-2 rounded text-black mb-2" />
-<button onclick="loadYouTube()" class="w-full bg-red-600 hover:bg-red-700 p-2 rounded">Load YouTube</button>
+  <div class="bg-gray-800 p-6 rounded-2xl w-[90vw] max-w-md shadow-lg text-base">
+    
+    <h1 class="text-2xl font-bold mb-4 text-center">🎵 Music Player</h1>
 
-<!-- YouTube Player -->
-<div id="ytPlayer" class="mt-4 hidden">
-  <iframe id="ytFrame" class="w-full h-56 rounded" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
+    <!-- Audio Player -->
+    <audio id="audio" controls class="w-full mb-4"></audio>
 
-<p class="text-xs text-gray-400 mt-4">
-  * Catatan: Audio YouTube tidak bisa diputar langsung sebagai MP3 karena batasan browser, jadi menggunakan embed.
-</p>
+    <!-- Local File Upload -->
+    <label class="block mb-2 font-semibold">Import dari Local Storage:</label>
+    <input type="file" id="fileInput" accept="audio/*" class="w-full mb-4" />
 
-  </div>  <script>
+    <!-- YouTube URL -->
+    <label class="block mb-2 font-semibold">Putar dari YouTube (Embed):</label>
+    <input type="text" id="ytUrl" placeholder="https://youtube.com/watch?v=..." 
+           class="w-full p-2 rounded text-black mb-2" />
+
+    <button onclick="loadYouTube()" 
+            class="w-full bg-red-600 hover:bg-red-700 p-3 rounded text-lg">
+      Load YouTube
+    </button>
+
+    <!-- YouTube Player -->
+    <div id="ytPlayer" class="mt-4 hidden">
+      <iframe id="ytFrame" 
+              class="w-full h-56 rounded" 
+              allow="autoplay; encrypted-media" 
+              allowfullscreen>
+      </iframe>
+    </div>
+
+    <!-- Link ke Riwayat -->
+    <a href="/riwayat/" 
+       class="block text-center mt-4 text-blue-400 underline">
+      📂 Lihat Riwayat Lagu
+    </a>
+
+    <p class="text-xs text-gray-400 mt-4">
+      * Catatan: Audio YouTube tidak bisa diputar langsung sebagai MP3 karena batasan browser, jadi menggunakan embed.
+    </p>
+
+  </div>
+
+  <script>
     const audio = document.getElementById("audio");
     const fileInput = document.getElementById("fileInput");
 
-    // Load local file
+    // Load local file + simpan ke riwayat
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -41,6 +65,17 @@
       audio.play();
 
       document.getElementById("ytPlayer").classList.add("hidden");
+
+      // Simpan ke localStorage
+      const history = JSON.parse(localStorage.getItem("musicHistory") || "[]");
+
+      history.push({
+        name: file.name,
+        url: url,
+        time: Date.now()
+      });
+
+      localStorage.setItem("musicHistory", JSON.stringify(history));
     });
 
     // Load YouTube
@@ -64,6 +99,7 @@
       const match = url.match(/(v=|youtu.be\/)([a-zA-Z0-9_-]{11})/);
       return match ? match[2] : null;
     }
-  </script></body>
+  </script>
 
-</html>
+</body>
+  </html>
