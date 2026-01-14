@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Mp3Player</title>
+  <title>Simple Music Player</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -55,7 +55,7 @@
     const audio = document.getElementById("audio");
     const fileInput = document.getElementById("fileInput");
 
-    // Load local file + simpan ke riwayat
+    // ===== LOCAL FILE =====
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -66,19 +66,19 @@
 
       document.getElementById("ytPlayer").classList.add("hidden");
 
-      // Simpan ke localStorage
       const history = JSON.parse(localStorage.getItem("musicHistory") || "[]");
 
       history.push({
         name: file.name,
         url: url,
+        type: "local",
         time: Date.now()
       });
 
       localStorage.setItem("musicHistory", JSON.stringify(history));
     });
 
-    // Load YouTube
+    // ===== YOUTUBE =====
     function loadYouTube() {
       const url = document.getElementById("ytUrl").value;
       const videoId = extractVideoId(url);
@@ -93,14 +93,33 @@
 
       document.getElementById("ytPlayer").classList.remove("hidden");
       audio.pause();
+
+      const history = JSON.parse(localStorage.getItem("musicHistory") || "[]");
+
+      history.push({
+        name: "YouTube: " + url,
+        url: url,
+        type: "youtube",
+        time: Date.now()
+      });
+
+      localStorage.setItem("musicHistory", JSON.stringify(history));
     }
 
     function extractVideoId(url) {
-      const match = url.match(/(v=|youtu.be\/)([a-zA-Z0-9_-]{11})/);
+      const match = url.match(/(v=|youtu.be\/|watch\?v=)([a-zA-Z0-9_-]{11})/);
       return match ? match[2] : null;
+    }
+
+    // ===== AUTO LOAD FROM HISTORY =====
+    const params = new URLSearchParams(window.location.search);
+    const yt = params.get("yt");
+
+    if (yt) {
+      document.getElementById("ytUrl").value = yt;
+      loadYouTube();
     }
   </script>
 
 </body>
-  </html>
-
+</html>
