@@ -2,90 +2,141 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mp3Play - Home</title>
+  <title>Music Player</title>
+
+  <!-- Anti Zoom Mobile -->
+  <meta name="viewport" 
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-black text-white min-h-screen flex flex-col">
 
-  <div class="flex justify-between items-center p-4 bg-zinc-900">
-    <h1 class="text-xl font-bold">🎧 Spotify Pro</h1>
-    <button id="themeBtn" class="bg-zinc-700 px-3 py-1 rounded">🌙</button>
+<!-- HEADER -->
+<div class="flex justify-between items-center p-4 bg-zinc-900">
+  <h1 id="logo" class="text-xl font-bold cursor-pointer">🎧 Music</h1>
+  <button id="themeBtn" class="bg-zinc-700 px-3 py-1 rounded">🌙</button>
+</div>
+
+<!-- MAIN -->
+<div class="flex-1 p-4 space-y-4">
+
+  <!-- SEARCH -->
+  <div>
+    <input id="searchInput" 
+      class="w-full p-2 rounded text-black" 
+      placeholder="Search lagu dari YouTube / YouTube Music">
+    <button onclick="searchYT()" 
+      class="w-full bg-green-600 p-2 rounded mt-2">
+      Search
+    </button>
   </div>
 
-  <div class="flex-1 p-4 space-y-4">
+  <!-- RESULT -->
+  <ul id="results" class="space-y-2"></ul>
 
-    <audio id="audio" controls class="w-full"></audio>
+  <!-- PLAYER -->
+  <audio id="audio" controls class="w-full mt-4"></audio>
 
-    <div>
-      <p class="font-semibold mb-1">Local Music</p>
-      <input type="file" id="fileInput" accept="audio/*" class="w-full" />
-    </div>
-
-    <div>
-      <p class="font-semibold mb-1">YouTube URL</p>
-      <input id="ytUrl" class="w-full p-2 text-black rounded" placeholder="https://youtube.com/watch?v=..." />
-      <button onclick="loadYouTube()" class="w-full bg-green-600 p-2 rounded mt-2">Play YouTube</button>
-    </div>
-
-    <div id="ytPlayer" class="hidden">
-      <iframe id="ytFrame" class="w-full h-56 rounded" allow="autoplay"></iframe>
-    </div>
-
-    <div class="flex gap-3">
-      <a href="/player.html" class="flex-1 bg-zinc-800 p-2 rounded text-center">Now Playing</a>
-      <a href="/history/" class="flex-1 bg-zinc-800 p-2 rounded text-center">History</a>
-      <a href="/playlist/" class="flex-1 bg-zinc-800 p-2 rounded text-center">Playlist</a>
-    </div>
+  <!-- YT PLAYER -->
+  <div id="ytPlayer" class="hidden mt-3">
+    <iframe id="ytFrame" class="w-full h-56 rounded" allow="autoplay"></iframe>
   </div>
+
+  <!-- CONTROL -->
+  <div class="flex justify-center gap-4">
+    <button onclick="prev()" class="bg-zinc-800 px-4 py-2 rounded">⏮</button>
+    <button onclick="next()" class="bg-zinc-800 px-4 py-2 rounded">⏭</button>
+  </div>
+
+</div>
 
 <script>
-const audio = document.getElementById('audio');
-const fileInput = document.getElementById('fileInput');
-
-let playlist = JSON.parse(localStorage.getItem('playlist') || '[]');
-
-fileInput.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const url = URL.createObjectURL(file);
-  audio.src = url;
-  audio.play();
-
-  playlist.push({ name: file.name, url, type: 'local' });
-  localStorage.setItem('playlist', JSON.stringify(playlist));
-});
-
-function loadYouTube() {
-  const url = document.getElementById('ytUrl').value;
-  const id = extractVideoId(url);
-  if (!id) return alert('Invalid URL');
-
-  document.getElementById('ytFrame').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
-  document.getElementById('ytPlayer').classList.remove('hidden');
-  audio.pause();
-
-  playlist.push({ name: 'YouTube', url, type: 'youtube' });
-  localStorage.setItem('playlist', JSON.stringify(playlist));
-}
-
-function extractVideoId(url) {
-  const m = url.match(/(v=|youtu.be\/)([\w-]{11})/);
-  return m ? m[2] : null;
-}
-
-// Theme toggle
-const themeBtn = document.getElementById('themeBtn');
+/* ========== THEME ========== */
+const themeBtn = document.getElementById("themeBtn");
 let dark = true;
 
 themeBtn.onclick = () => {
   dark = !dark;
-  document.body.className = dark ? 'bg-black text-white min-h-screen flex flex-col'
-                               : 'bg-white text-black min-h-screen flex flex-col';
-  themeBtn.textContent = dark ? '🌙' : '☀️';
+  document.body.className = dark 
+    ? "bg-black text-white min-h-screen flex flex-col"
+    : "bg-white text-black min-h-screen flex flex-col";
+  themeBtn.textContent = dark ? "🌙" : "☀️";
 };
+
+/* ========== BACK HOME ========== */
+document.getElementById("logo").onclick = () => {
+  window.location.href = "/";
+};
+
+/* ========== SEARCH YT (SIMPLE) ========== */
+let playlist = [];
+let current = 0;
+
+function searchYT() {
+  const q = document.getElementById("searchInput").value;
+  if (!q) return;
+
+  // Pake YouTube embed search (tanpa API key)
+  const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+
+  // Dummy playlist (manual play)
+  playlist = [q];
+  renderResults();
+}
+
+function renderResults() {
+  const ul = document.getElementById("results");
+  ul.innerHTML = "";
+
+  playlist.forEach((title, i) => {
+    const li = document.createElement("li");
+    li.className = "bg-zinc-800 p-2 rounded cursor-pointer";
+    li.textContent = title;
+
+    li.onclick = () => playYT(title);
+    ul.appendChild(li);
+  });
+}
+
+/* ========== PLAY YT ========== */
+function playYT(query) {
+  const iframe = document.getElementById("ytFrame");
+  iframe.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1`;
+
+  document.getElementById("ytPlayer").classList.remove("hidden");
+}
+
+/* ========== NEXT / PREV ========== */
+function next() {
+  current++;
+  if (current >= playlist.length) current = 0;
+  playYT(playlist[current]);
+}
+
+function prev() {
+  current--;
+  if (current < 0) current = playlist.length - 1;
+  playYT(playlist[current]);
+}
+
+/* ========== BASS BOOST ========== */
+const audio = document.getElementById("audio");
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const ctx = new AudioContext();
+
+const source = ctx.createMediaElementSource(audio);
+const bass = ctx.createBiquadFilter();
+
+bass.type = "lowshelf";
+bass.frequency.value = 200;   // Bass area
+bass.gain.value = 15;        // Boost bass
+
+source.connect(bass);
+bass.connect(ctx.destination);
+
+audio.onplay = () => ctx.resume();
 </script>
 
 </body>
