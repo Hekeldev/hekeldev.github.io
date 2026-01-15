@@ -125,17 +125,20 @@ function capture() {
   const vh = video.videoHeight;
   if (!vw || !vh) return;
 
-  // STOP CAMERA BIAR HP GA LAG
-  stream.getTracks().forEach(t => t.stop());
-  stream = null;
-
+  // hitung scale ke 4K
   const scale = Math.max(3840 / vw, 2160 / vh);
   canvas.width = Math.round(vw * scale);
   canvas.height = Math.round(vh * scale);
 
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
+
+  // ✅ GAMBAR FRAME SELAGI STREAM MASIH HIDUP
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // ✅ BARU STOP KAMERA
+  stream.getTracks().forEach(t => t.stop());
+  stream = null;
 
   const data = canvas.toDataURL("image/jpeg", 0.92);
   photo.src = data;
