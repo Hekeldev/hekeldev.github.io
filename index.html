@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Local Music Player</title>
+  <title>Mp3Player - By Aang Dev</title>
 
   <!-- Anti Zoom Mobile -->
   <meta name="viewport" 
@@ -146,7 +146,7 @@ const bass = ctx.createBiquadFilter();
 
 bass.type = "lowshelf";
 bass.frequency.value = 200;
-bass.gain.value = 15;
+bass.gain.value = 2;
 
 source.connect(bass);
 bass.connect(ctx.destination);
