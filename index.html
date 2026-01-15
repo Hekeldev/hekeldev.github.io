@@ -1,71 +1,54 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>Web Camera</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #fff;
-      text-align: center;
-      padding: 20px;
-    }
-    video, canvas, img {
-      max-width: 100%;
-      border-radius: 12px;
-      margin-top: 10px;
-    }
-    button, select {
-      margin: 8px;
-      padding: 10px 16px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-    }
-    button {
-      background: #2563eb;
-      color: #fff;
-    }
-    button:hover {
-      background: #1d4ed8;
-    }
-    .box {
-      background: #020617;
-      padding: 15px;
-      border-radius: 14px;
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Web Camera HD</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  background:#020617;
+  color:white;
+  font-family:Arial;
+  text-align:center;
+  padding:15px;
+}
+video, img {
+  width:100%;
+  border-radius:12px;
+  margin-top:10px;
+}
+button {
+  padding:10px 14px;
+  border:none;
+  border-radius:8px;
+  margin:6px;
+  background:#2563eb;
+  color:white;
+}
+.box {
+  background:#020617;
+  padding:15px;
+  border-radius:12px;
+  margin-top:15px;
+}
+</style>
 </head>
 <body>
 
-  <h1>📷 Web Camera + Upscale</h1>
+<h2>📸 Web Camera HD © AangDev</h2>
 
-  <video id="video" autoplay playsinline></video><br>
-  <button onclick="takePhoto()">📸 Ambil Foto</button>
+<video id="video" autoplay playsinline></video><br>
+<button onclick="switchCamera()">🔄 Ganti Kamera</button>
+<button onclick="capture()">📷 Ambil Foto</button>
 
-  <div id="result" class="box" style="display:none;">
-    <h3>Hasil Foto</h3>
-    <img id="photo">
+<div id="result" class="box" style="display:none">
+  <h3>Hasil (Auto 4K)</h3>
+  <img id="photo">
+  <p id="info"></p>
+  <button onclick="download()">⬇️ Download</button>
+</div>
 
-    <p>
-      Upscale ke:
-      <select id="scale">
-        <option value="2">2x (≈4K)</option>
-        <option value="3">3x</option>
-        <option value="4">4x (≈8K)</option>
-      </select>
-    </p>
-
-    <button onclick="upscale()">🚀 Upscale</button>
-    <button onclick="download()">⬇️ Download</button>
-
-    <p id="info"></p>
-    <canvas id="canvas" hidden></canvas>
-  </div>
-
-  <script src="script.js"></script>
+<canvas id="canvas" hidden></canvas>
+<script src="script.js"></script>
 </body>
 </html>
