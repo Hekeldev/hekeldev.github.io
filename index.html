@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mp3Player</title>
+  <title>Local Music Player</title>
 
   <!-- Anti Zoom Mobile -->
   <meta name="viewport" 
@@ -15,47 +15,43 @@
 
 <!-- HEADER -->
 <div class="flex justify-between items-center p-4 bg-zinc-900">
-  <h1 id="logo" class="text-xl font-bold cursor-pointer">🎧 Music</h1>
+  <h1 id="logo" class="text-xl font-bold cursor-pointer">🎧 My Music</h1>
   <button id="themeBtn" class="bg-zinc-700 px-3 py-1 rounded">🌙</button>
 </div>
 
 <!-- MAIN -->
 <div class="flex-1 p-4 space-y-4">
 
-  <!-- SEARCH -->
-  <div>
-    <input id="searchInput" 
-      class="w-full p-2 rounded text-black" 
-      placeholder="Search lagu dari YouTube / YouTube Music">
-    <button onclick="searchYT()" 
-      class="w-full bg-green-600 p-2 rounded mt-2">
-      Search
+  <!-- UPLOAD -->
+  <input type="file" id="fileInput" multiple accept="audio/*"
+    class="w-full p-2 rounded bg-zinc-800">
+
+  <!-- SORT -->
+  <div class="flex gap-2">
+    <button onclick="sortAdded()" class="bg-zinc-800 px-3 py-1 rounded">
+      Urutan Ditambahkan
+    </button>
+    <button onclick="sortAZ()" class="bg-zinc-800 px-3 py-1 rounded">
+      A - Z
     </button>
   </div>
 
-  <!-- PLAYER YT -->
-  <div id="ytPlayer" class="hidden mt-3">
-    <iframe 
-      id="ytFrame" 
-      class="w-full h-56 rounded"
-      allow="autoplay"
-      enablejsapi="1">
-    </iframe>
-  </div>
+  <!-- PLAYLIST -->
+  <ul id="playlist" class="space-y-2"></ul>
 
-  <!-- CONTROL -->
+  <!-- PLAYER -->
+  <audio id="audio" controls class="w-full mt-4"></audio>
+
+  <!-- CONTROLS -->
   <div class="flex justify-center gap-4">
     <button onclick="prev()" class="bg-zinc-800 px-4 py-2 rounded">⏮</button>
     <button onclick="next()" class="bg-zinc-800 px-4 py-2 rounded">⏭</button>
   </div>
 
-  <!-- LOCAL AUDIO -->
-  <audio id="audio" controls class="w-full mt-4"></audio>
-
 </div>
 
 <script>
-/* ========== THEME ========== */
+/* THEME */
 const themeBtn = document.getElementById("themeBtn");
 let dark = true;
 
@@ -67,39 +63,80 @@ themeBtn.onclick = () => {
   themeBtn.textContent = dark ? "🌙" : "☀️";
 };
 
-/* ========== BACK HOME ========== */
-document.getElementById("logo").onclick = () => {
-  window.location.href = "/";
-};
+/* BACK HOME */
+document.getElementById("logo").onclick = () => location.reload();
 
-/* ========== SEARCH YOUTUBE ========== */
-function searchYT() {
-  const q = document.getElementById("searchInput").value;
-  if (!q) return alert("Masukin judul lagu dulu!");
+/* MUSIC DATA */
+let songs = [];
+let originalOrder = [];
+let current = 0;
 
-  const iframe = document.getElementById("ytFrame");
+/* LOAD FILES */
+document.getElementById("fileInput").addEventListener("change", e => {
+  const files = Array.from(e.target.files);
 
-  iframe.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}&autoplay=1&enablejsapi=1`;
+  files.forEach(file => {
+    songs.push({
+      name: file.name,
+      url: URL.createObjectURL(file)
+    });
+  });
 
-  document.getElementById("ytPlayer").classList.remove("hidden");
+  originalOrder = [...songs];
+  render();
+});
+
+/* RENDER PLAYLIST */
+function render() {
+  const ul = document.getElementById("playlist");
+  ul.innerHTML = "";
+
+  songs.forEach((song, i) => {
+    const li = document.createElement("li");
+    li.className = "bg-zinc-800 p-2 rounded cursor-pointer";
+    li.textContent = song.name;
+
+    li.onclick = () => play(i);
+    ul.appendChild(li);
+  });
 }
 
-/* ========== NEXT / PREV ========== */
+/* PLAY */
+function play(i) {
+  current = i;
+  const audio = document.getElementById("audio");
+  audio.src = songs[i].url;
+  audio.play();
+}
+
+/* AUTO NEXT */
+document.getElementById("audio").onended = next;
+
+/* NEXT / PREV */
 function next() {
-  document.getElementById("ytFrame").contentWindow.postMessage(
-    '{"event":"command","func":"nextVideo","args":""}',
-    "*"
-  );
+  current++;
+  if (current >= songs.length) current = 0;
+  play(current);
 }
 
 function prev() {
-  document.getElementById("ytFrame").contentWindow.postMessage(
-    '{"event":"command","func":"previousVideo","args":""}',
-    "*"
-  );
+  current--;
+  if (current < 0) current = songs.length - 1;
+  play(current);
 }
 
-/* ========== BASS BOOST (LOCAL AUDIO) ========== */
+/* SORT */
+function sortAZ() {
+  songs.sort((a, b) => a.name.localeCompare(b.name));
+  render();
+}
+
+function sortAdded() {
+  songs = [...originalOrder];
+  render();
+}
+
+/* BASS BOOST */
 const audio = document.getElementById("audio");
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const ctx = new AudioContext();
