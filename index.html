@@ -2,124 +2,91 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Mp3Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mp3Play - Home</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+<body class="bg-black text-white min-h-screen flex flex-col">
 
-  <div class="bg-gray-800 p-6 rounded-2xl w-[90vw] max-w-md shadow-lg text-base">
-    
-    <h1 class="text-2xl font-bold mb-4 text-center">🎵 Music Player</h1>
-
-    <!-- Audio Player -->
-    <audio id="audio" controls class="w-full mb-4"></audio>
-
-    <!-- Local File Upload -->
-    <label class="block mb-2 font-semibold">Import dari Local Storage:</label>
-    <input type="file" id="fileInput" accept="audio/*" class="w-full mb-4" />
-
-    <!-- YouTube URL -->
-    <label class="block mb-2 font-semibold">Putar dari YouTube (Embed):</label>
-    <input type="text" id="ytUrl" placeholder="https://youtube.com/watch?v=..." 
-           class="w-full p-2 rounded text-black mb-2" />
-
-    <button onclick="loadYouTube()" 
-            class="w-full bg-red-600 hover:bg-red-700 p-3 rounded text-lg">
-      Load YouTube
-    </button>
-
-    <!-- YouTube Player -->
-    <div id="ytPlayer" class="mt-4 hidden">
-      <iframe id="ytFrame" 
-              class="w-full h-56 rounded" 
-              allow="autoplay; encrypted-media" 
-              allowfullscreen>
-      </iframe>
-    </div>
-
-    <!-- Link ke Riwayat -->
-    <a href="/history/" 
-       class="block text-center mt-4 text-blue-400 underline">
-      📂 Lihat Riwayat Lagu
-    </a>
-
-    <p class="text-xs text-gray-400 mt-4">
-      * Catatan: Audio YouTube tidak bisa diputar langsung sebagai MP3 karena batasan browser, jadi menggunakan embed.
-    </p>
-
+  <div class="flex justify-between items-center p-4 bg-zinc-900">
+    <h1 class="text-xl font-bold">🎧 Spotify Pro</h1>
+    <button id="themeBtn" class="bg-zinc-700 px-3 py-1 rounded">🌙</button>
   </div>
 
-  <script>
-    const audio = document.getElementById("audio");
-    const fileInput = document.getElementById("fileInput");
+  <div class="flex-1 p-4 space-y-4">
 
-    // ===== LOCAL FILE =====
-    fileInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    <audio id="audio" controls class="w-full"></audio>
 
-      const url = URL.createObjectURL(file);
-      audio.src = url;
-      audio.play();
+    <div>
+      <p class="font-semibold mb-1">Local Music</p>
+      <input type="file" id="fileInput" accept="audio/*" class="w-full" />
+    </div>
 
-      document.getElementById("ytPlayer").classList.add("hidden");
+    <div>
+      <p class="font-semibold mb-1">YouTube URL</p>
+      <input id="ytUrl" class="w-full p-2 text-black rounded" placeholder="https://youtube.com/watch?v=..." />
+      <button onclick="loadYouTube()" class="w-full bg-green-600 p-2 rounded mt-2">Play YouTube</button>
+    </div>
 
-      const history = JSON.parse(localStorage.getItem("musicHistory") || "[]");
+    <div id="ytPlayer" class="hidden">
+      <iframe id="ytFrame" class="w-full h-56 rounded" allow="autoplay"></iframe>
+    </div>
 
-      history.push({
-        name: file.name,
-        url: url,
-        type: "local",
-        time: Date.now()
-      });
+    <div class="flex gap-3">
+      <a href="/player.html" class="flex-1 bg-zinc-800 p-2 rounded text-center">Now Playing</a>
+      <a href="/history/" class="flex-1 bg-zinc-800 p-2 rounded text-center">History</a>
+      <a href="/playlist/" class="flex-1 bg-zinc-800 p-2 rounded text-center">Playlist</a>
+    </div>
+  </div>
 
-      localStorage.setItem("musicHistory", JSON.stringify(history));
-    });
+<script>
+const audio = document.getElementById('audio');
+const fileInput = document.getElementById('fileInput');
 
-    // ===== YOUTUBE =====
-    function loadYouTube() {
-      const url = document.getElementById("ytUrl").value;
-      const videoId = extractVideoId(url);
+let playlist = JSON.parse(localStorage.getItem('playlist') || '[]');
 
-      if (!videoId) {
-        alert("URL YouTube tidak valid");
-        return;
-      }
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-      const iframe = document.getElementById("ytFrame");
-      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+  const url = URL.createObjectURL(file);
+  audio.src = url;
+  audio.play();
 
-      document.getElementById("ytPlayer").classList.remove("hidden");
-      audio.pause();
+  playlist.push({ name: file.name, url, type: 'local' });
+  localStorage.setItem('playlist', JSON.stringify(playlist));
+});
 
-      const history = JSON.parse(localStorage.getItem("musicHistory") || "[]");
+function loadYouTube() {
+  const url = document.getElementById('ytUrl').value;
+  const id = extractVideoId(url);
+  if (!id) return alert('Invalid URL');
 
-      history.push({
-        name: "YouTube: " + url,
-        url: url,
-        type: "youtube",
-        time: Date.now()
-      });
+  document.getElementById('ytFrame').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+  document.getElementById('ytPlayer').classList.remove('hidden');
+  audio.pause();
 
-      localStorage.setItem("musicHistory", JSON.stringify(history));
-    }
+  playlist.push({ name: 'YouTube', url, type: 'youtube' });
+  localStorage.setItem('playlist', JSON.stringify(playlist));
+}
 
-    function extractVideoId(url) {
-      const match = url.match(/(v=|youtu.be\/|watch\?v=)([a-zA-Z0-9_-]{11})/);
-      return match ? match[2] : null;
-    }
+function extractVideoId(url) {
+  const m = url.match(/(v=|youtu.be\/)([\w-]{11})/);
+  return m ? m[2] : null;
+}
 
-    // ===== AUTO LOAD FROM HISTORY =====
-    const params = new URLSearchParams(window.location.search);
-    const yt = params.get("yt");
+// Theme toggle
+const themeBtn = document.getElementById('themeBtn');
+let dark = true;
 
-    if (yt) {
-      document.getElementById("ytUrl").value = yt;
-      loadYouTube();
-    }
-  </script>
+themeBtn.onclick = () => {
+  dark = !dark;
+  document.body.className = dark ? 'bg-black text-white min-h-screen flex flex-col'
+                               : 'bg-white text-black min-h-screen flex flex-col';
+  themeBtn.textContent = dark ? '🌙' : '☀️';
+};
+</script>
 
 </body>
 </html>
