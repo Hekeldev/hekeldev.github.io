@@ -1,83 +1,29 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Riwayat Lagu</title>
+  <meta charset="UTF-8">
+  <title>History</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-4">
+<body class="bg-black text-white min-h-screen p-4">
 
-  <a href="/" class="text-2xl font-bold mb-4 flex items-center gap-2 hover:text-blue-400 transition">
-    🎧 Riwayat Lagu
-  </a>
+  <a href="/" class="text-green-400">← Home</a>
+  <h1 class="text-xl font-bold mb-4">🕘 Riwayat Lagu</h1>
 
-  <div class="w-full max-w-md bg-gray-800 p-4 rounded-xl shadow">
+  <ul id="list" class="space-y-2"></ul>
 
-    <div class="flex gap-2 mb-3">
-      <button onclick="sortByTime()" class="flex-1 bg-blue-600 p-2 rounded">Urutan Riwayat</button>
-      <button onclick="sortByName()" class="flex-1 bg-green-600 p-2 rounded">A - Z</button>
-    </div>
+<script>
+let history = JSON.parse(localStorage.getItem('playlist') || '[]');
+const list = document.getElementById('list');
 
-    <ul id="historyList" class="space-y-2"></ul>
-
-    <audio id="player" controls class="w-full mt-4"></audio>
-
-  </div>
-
-  <input type="file" id="filePicker" accept="audio/*" hidden>
-
-  <script>
-    let history = JSON.parse(localStorage.getItem("musicHistory") || "[]");
-    let selectedSong = null;
-
-    function render(list) {
-      const ul = document.getElementById("historyList");
-      ul.innerHTML = "";
-
-      list.forEach((song, i) => {
-        const li = document.createElement("li");
-        li.className = "bg-gray-700 p-2 rounded flex justify-between items-center";
-
-        li.innerHTML = `
-          <span>${i + 1}. ${song.name}</span>
-          <button class="bg-blue-600 px-3 py-1 rounded text-sm">Play</button>
-        `;
-
-        li.querySelector("button").onclick = () => {
-          if (song.type === "youtube") {
-            window.location.href = "/?yt=" + encodeURIComponent(song.url);
-          } else {
-            selectedSong = song.name;
-            document.getElementById("filePicker").click();
-          }
-        };
-
-        ul.appendChild(li);
-      });
-    }
-
-    function sortByTime() {
-      render(history);
-    }
-
-    function sortByName() {
-      const sorted = [...history].sort((a, b) => a.name.localeCompare(b.name));
-      render(sorted);
-    }
-
-    document.getElementById("filePicker").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const player = document.getElementById("player");
-      player.src = URL.createObjectURL(file);
-      player.play();
-    });
-
-    render(history);
-  </script>
+history.forEach(song => {
+  const li = document.createElement('li');
+  li.className = "bg-zinc-800 p-2 rounded";
+  li.textContent = song.name;
+  list.appendChild(li);
+});
+</script>
 
 </body>
 </html>
