@@ -1,158 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Mp3Player - By Aang Dev</title>
-
-  <!-- Anti Zoom Mobile -->
-  <meta name="viewport" 
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Web Camera</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    video, canvas, img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+    button, select {
+      margin: 8px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    button {
+      background: #2563eb;
+      color: #fff;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    .box {
+      background: #020617;
+      padding: 15px;
+      border-radius: 14px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
+<body>
 
-<body class="bg-black text-white min-h-screen flex flex-col">
+  <h1>📷 Web Camera + Upscale</h1>
 
-<!-- HEADER -->
-<div class="flex justify-between items-center p-4 bg-zinc-900">
-  <h1 id="logo" class="text-xl font-bold cursor-pointer">🎧 My Music</h1>
-  <button id="themeBtn" class="bg-zinc-700 px-3 py-1 rounded">🌙</button>
-</div>
+  <video id="video" autoplay playsinline></video><br>
+  <button onclick="takePhoto()">📸 Ambil Foto</button>
 
-<!-- MAIN -->
-<div class="flex-1 p-4 space-y-4">
+  <div id="result" class="box" style="display:none;">
+    <h3>Hasil Foto</h3>
+    <img id="photo">
 
-  <!-- UPLOAD -->
-  <input type="file" id="fileInput" multiple accept="audio/*"
-    class="w-full p-2 rounded bg-zinc-800">
+    <p>
+      Upscale ke:
+      <select id="scale">
+        <option value="2">2x (≈4K)</option>
+        <option value="3">3x</option>
+        <option value="4">4x (≈8K)</option>
+      </select>
+    </p>
 
-  <!-- SORT -->
-  <div class="flex gap-2">
-    <button onclick="sortAdded()" class="bg-zinc-800 px-3 py-1 rounded">
-      Urutan Ditambahkan
-    </button>
-    <button onclick="sortAZ()" class="bg-zinc-800 px-3 py-1 rounded">
-      A - Z
-    </button>
+    <button onclick="upscale()">🚀 Upscale</button>
+    <button onclick="download()">⬇️ Download</button>
+
+    <p id="info"></p>
+    <canvas id="canvas" hidden></canvas>
   </div>
 
-  <!-- PLAYLIST -->
-  <ul id="playlist" class="space-y-2"></ul>
-
-  <!-- PLAYER -->
-  <audio id="audio" controls class="w-full mt-4"></audio>
-
-  <!-- CONTROLS -->
-  <div class="flex justify-center gap-4">
-    <button onclick="prev()" class="bg-zinc-800 px-4 py-2 rounded">⏮</button>
-    <button onclick="next()" class="bg-zinc-800 px-4 py-2 rounded">⏭</button>
-  </div>
-
-</div>
-
-<script>
-/* THEME */
-const themeBtn = document.getElementById("themeBtn");
-let dark = true;
-
-themeBtn.onclick = () => {
-  dark = !dark;
-  document.body.className = dark 
-    ? "bg-black text-white min-h-screen flex flex-col"
-    : "bg-white text-black min-h-screen flex flex-col";
-  themeBtn.textContent = dark ? "🌙" : "☀️";
-};
-
-/* BACK HOME */
-document.getElementById("logo").onclick = () => location.reload();
-
-/* MUSIC DATA */
-let songs = [];
-let originalOrder = [];
-let current = 0;
-
-/* LOAD FILES */
-document.getElementById("fileInput").addEventListener("change", e => {
-  const files = Array.from(e.target.files);
-
-  files.forEach(file => {
-    songs.push({
-      name: file.name,
-      url: URL.createObjectURL(file)
-    });
-  });
-
-  originalOrder = [...songs];
-  render();
-});
-
-/* RENDER PLAYLIST */
-function render() {
-  const ul = document.getElementById("playlist");
-  ul.innerHTML = "";
-
-  songs.forEach((song, i) => {
-    const li = document.createElement("li");
-    li.className = "bg-zinc-800 p-2 rounded cursor-pointer";
-    li.textContent = song.name;
-
-    li.onclick = () => play(i);
-    ul.appendChild(li);
-  });
-}
-
-/* PLAY */
-function play(i) {
-  current = i;
-  const audio = document.getElementById("audio");
-  audio.src = songs[i].url;
-  audio.play();
-}
-
-/* AUTO NEXT */
-document.getElementById("audio").onended = next;
-
-/* NEXT / PREV */
-function next() {
-  current++;
-  if (current >= songs.length) current = 0;
-  play(current);
-}
-
-function prev() {
-  current--;
-  if (current < 0) current = songs.length - 1;
-  play(current);
-}
-
-/* SORT */
-function sortAZ() {
-  songs.sort((a, b) => a.name.localeCompare(b.name));
-  render();
-}
-
-function sortAdded() {
-  songs = [...originalOrder];
-  render();
-}
-
-/* BASS BOOST */
-const audio = document.getElementById("audio");
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-const ctx = new AudioContext();
-
-const source = ctx.createMediaElementSource(audio);
-const bass = ctx.createBiquadFilter();
-
-bass.type = "lowshelf";
-bass.frequency.value = 200;
-bass.gain.value = 2;
-
-source.connect(bass);
-bass.connect(ctx.destination);
-
-audio.onplay = () => ctx.resume();
-</script>
-
+  <script src="script.js"></script>
 </body>
 </html>
