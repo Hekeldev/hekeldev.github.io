@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Music Player</title>
+  <title>Mp3Player</title>
 
   <!-- Anti Zoom Mobile -->
   <meta name="viewport" 
@@ -33,15 +33,14 @@
     </button>
   </div>
 
-  <!-- RESULT -->
-  <ul id="results" class="space-y-2"></ul>
-
-  <!-- PLAYER -->
-  <audio id="audio" controls class="w-full mt-4"></audio>
-
-  <!-- YT PLAYER -->
+  <!-- PLAYER YT -->
   <div id="ytPlayer" class="hidden mt-3">
-    <iframe id="ytFrame" class="w-full h-56 rounded" allow="autoplay"></iframe>
+    <iframe 
+      id="ytFrame" 
+      class="w-full h-56 rounded"
+      allow="autoplay"
+      enablejsapi="1">
+    </iframe>
   </div>
 
   <!-- CONTROL -->
@@ -49,6 +48,9 @@
     <button onclick="prev()" class="bg-zinc-800 px-4 py-2 rounded">⏮</button>
     <button onclick="next()" class="bg-zinc-800 px-4 py-2 rounded">⏭</button>
   </div>
+
+  <!-- LOCAL AUDIO -->
+  <audio id="audio" controls class="w-full mt-4"></audio>
 
 </div>
 
@@ -70,58 +72,34 @@ document.getElementById("logo").onclick = () => {
   window.location.href = "/";
 };
 
-/* ========== SEARCH YT (SIMPLE) ========== */
-let playlist = [];
-let current = 0;
-
+/* ========== SEARCH YOUTUBE ========== */
 function searchYT() {
   const q = document.getElementById("searchInput").value;
-  if (!q) return;
+  if (!q) return alert("Masukin judul lagu dulu!");
 
-  // Pake YouTube embed search (tanpa API key)
-  const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
-
-  // Dummy playlist (manual play)
-  playlist = [q];
-  renderResults();
-}
-
-function renderResults() {
-  const ul = document.getElementById("results");
-  ul.innerHTML = "";
-
-  playlist.forEach((title, i) => {
-    const li = document.createElement("li");
-    li.className = "bg-zinc-800 p-2 rounded cursor-pointer";
-    li.textContent = title;
-
-    li.onclick = () => playYT(title);
-    ul.appendChild(li);
-  });
-}
-
-/* ========== PLAY YT ========== */
-function playYT(query) {
   const iframe = document.getElementById("ytFrame");
-  iframe.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1`;
+
+  iframe.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}&autoplay=1&enablejsapi=1`;
 
   document.getElementById("ytPlayer").classList.remove("hidden");
 }
 
 /* ========== NEXT / PREV ========== */
 function next() {
-  current++;
-  if (current >= playlist.length) current = 0;
-  playYT(playlist[current]);
+  document.getElementById("ytFrame").contentWindow.postMessage(
+    '{"event":"command","func":"nextVideo","args":""}',
+    "*"
+  );
 }
 
 function prev() {
-  current--;
-  if (current < 0) current = playlist.length - 1;
-  playYT(playlist[current]);
+  document.getElementById("ytFrame").contentWindow.postMessage(
+    '{"event":"command","func":"previousVideo","args":""}',
+    "*"
+  );
 }
 
-/* ========== BASS BOOST ========== */
+/* ========== BASS BOOST (LOCAL AUDIO) ========== */
 const audio = document.getElementById("audio");
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const ctx = new AudioContext();
@@ -130,8 +108,8 @@ const source = ctx.createMediaElementSource(audio);
 const bass = ctx.createBiquadFilter();
 
 bass.type = "lowshelf";
-bass.frequency.value = 200;   // Bass area
-bass.gain.value = 15;        // Boost bass
+bass.frequency.value = 200;
+bass.gain.value = 15;
 
 source.connect(bass);
 bass.connect(ctx.destination);
