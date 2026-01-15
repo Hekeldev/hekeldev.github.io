@@ -2,53 +2,167 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Web Camera HD</title>
+<title>📷 Web Camera HD © AangDev</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body {
-  background:#020617;
-  color:white;
-  font-family:Arial;
-  text-align:center;
-  padding:15px;
+  margin: 0;
+  padding: 15px;
+  background: linear-gradient(160deg, #020617, #020617);
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
 }
-video, img {
-  width:100%;
-  border-radius:12px;
-  margin-top:10px;
+
+h2 {
+  margin-bottom: 12px;
 }
+
+.camera-box {
+  position: relative;
+  z-index: 1;
+}
+
+video {
+  width: 100%;
+  border-radius: 16px;
+  pointer-events: none; /* 🔥 KUNCI ANTI BUG */
+}
+
+.controls {
+  margin-top: 15px;
+  z-index: 10;
+  position: relative;
+}
+
 button {
-  padding:10px 14px;
-  border:none;
-  border-radius:8px;
-  margin:6px;
-  background:#2563eb;
-  color:white;
+  padding: 12px 18px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  margin: 6px;
+  touch-action: manipulation;
 }
-.box {
-  background:#020617;
-  padding:15px;
-  border-radius:12px;
-  margin-top:15px;
+
+button:active {
+  transform: scale(0.97);
+}
+
+.result {
+  margin-top: 20px;
+}
+
+img {
+  width: 100%;
+  border-radius: 16px;
+}
+
+.info {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.9;
 }
 </style>
 </head>
+
 <body>
 
-<h2>📸 Web Camera HD  © AangDev</h2>
+<h2>📸 Web Camera HD © AangDev</h2>
 
-<video id="video" autoplay playsinline></video><br>
-<button id="switchBtn">🔄 Ganti Kamera</button>
-<button id="captureBtn">📷 Ambil Foto</button>
+<div class="camera-box">
+  <video id="video" autoplay playsinline></video>
+</div>
 
-<div id="result" class="box" style="display:none">
-  <h3>Hasil (Auto 4K)</h3>
+<div class="controls">
+  <button id="captureBtn">📷 Ambil Foto</button>
+</div>
+
+<div class="result" id="result" style="display:none">
   <img id="photo">
-  <p id="info"></p>
-  <button onclick="download()">⬇️ Download</button>
+  <div class="info" id="info"></div>
+  <button id="downloadBtn">⬇️ Download</button>
 </div>
 
 <canvas id="canvas" hidden></canvas>
-<script src="script.js"></script>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const captureBtn = document.getElementById("captureBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+const photo = document.getElementById("photo");
+const info = document.getElementById("info");
+
+let stream = null;
+
+// START BACK CAMERA ONLY
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { exact: "environment" },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
+    });
+    video.srcObject = stream;
+    await video.play();
+  } catch (e) {
+    alert("Kamera belakang tidak tersedia / izin ditolak");
+    console.error(e);
+  }
+}
+
+// CAPTURE + AUTO 4K
+function capture() {
+  if (!stream) return;
+
+  const vw = video.videoWidth;
+  const vh = video.videoHeight;
+  if (!vw || !vh) return;
+
+  // STOP CAMERA BIAR HP GA LAG
+  stream.getTracks().forEach(t => t.stop());
+  stream = null;
+
+  const scale = Math.max(3840 / vw, 2160 / vh);
+  canvas.width = Math.round(vw * scale);
+  canvas.height = Math.round(vh * scale);
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const data = canvas.toDataURL("image/jpeg", 0.92);
+  photo.src = data;
+
+  info.innerText =
+    `Original: ${vw}×${vh} → Output: ${canvas.width}×${canvas.height} (Auto 4K)`;
+
+  document.getElementById("result").style.display = "block";
+}
+
+// DOWNLOAD
+function download() {
+  const a = document.createElement("a");
+  a.href = canvas.toDataURL("image/jpeg", 0.92);
+  a.download = "photo-4k.jpg";
+  a.click();
+}
+
+// EVENTS
+captureBtn.addEventListener("click", capture);
+captureBtn.addEventListener("touchstart", capture);
+downloadBtn.addEventListener("click", download);
+downloadBtn.addEventListener("touchstart", download);
+
+// INIT
+startCamera();
+</script>
+
 </body>
 </html>
